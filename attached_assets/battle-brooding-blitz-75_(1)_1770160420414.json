@@ -1,0 +1,2176 @@
+{
+  "battleId": "b9e7227a4c73650c",
+  "displayName": "Brooding-Blitz-75",
+  "status": "active",
+  "isPrivate": false,
+  "createdAt": "2026-02-02T09:50:32.580Z",
+  "updatedAt": "2026-02-03T16:12:32.491Z",
+  "currentTurn": 14,
+  "currentPlayerIndex": 0,
+  "winnerId": null,
+  "endReason": null,
+  "mapData": {
+    "selection": "Vending Verdict"
+  },
+  "players": {
+    "player1": {
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "displayName": "dusty-oriole-27",
+      "avatar": "BIRD1"
+    },
+    "player2": {
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "displayName": "illegal-toucan-89",
+      "avatar": "BIRD7"
+    }
+  },
+  "turns": [
+    {
+      "turnId": "54dc56170c518482",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 1,
+      "timestamp": "2026-02-02T21:48:57.815Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 4,
+            "y": 2
+          },
+          "to": {
+            "x": 8,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_3",
+          "data": {
+            "path": [
+              {
+                "x": 4,
+                "y": 2
+              },
+              {
+                "x": 5,
+                "y": 2
+              },
+              {
+                "x": 6,
+                "y": 2
+              },
+              {
+                "x": 7,
+                "y": 2
+              },
+              {
+                "x": 8,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 3,
+            "y": 1
+          },
+          "to": {
+            "x": 7,
+            "y": 1
+          },
+          "type": "wait",
+          "unitId": "unit_1",
+          "data": {
+            "path": [
+              {
+                "x": 3,
+                "y": 1
+              },
+              {
+                "x": 4,
+                "y": 1
+              },
+              {
+                "x": 5,
+                "y": 1
+              },
+              {
+                "x": 6,
+                "y": 1
+              },
+              {
+                "x": 7,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 1,
+            "y": 3
+          },
+          "to": {
+            "x": 5,
+            "y": 3
+          },
+          "type": "take_off",
+          "unitId": "unit_2",
+          "data": {
+            "path": [
+              {
+                "x": 1,
+                "y": 3
+              },
+              {
+                "x": 2,
+                "y": 3
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 4,
+                "y": 3
+              },
+              {
+                "x": 5,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "targetPos": {
+              "x": 2,
+              "y": 3
+            },
+            "teamId": 1,
+            "unitType": "BIRD2"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "2d57e9e6feb3a4b0",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 2,
+      "timestamp": "2026-02-02T21:50:01.079Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 21,
+            "y": 2
+          },
+          "to": {
+            "x": 20,
+            "y": 2
+          },
+          "type": "capture",
+          "unitId": "unit_6",
+          "targetId": "food_12",
+          "data": {
+            "path": [
+              {
+                "x": 21,
+                "y": 2
+              },
+              {
+                "x": 20,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 22,
+            "y": 1
+          },
+          "to": {
+            "x": 18,
+            "y": 1
+          },
+          "type": "wait",
+          "unitId": "unit_5",
+          "data": {
+            "path": [
+              {
+                "x": 22,
+                "y": 1
+              },
+              {
+                "x": 21,
+                "y": 1
+              },
+              {
+                "x": 20,
+                "y": 1
+              },
+              {
+                "x": 19,
+                "y": 1
+              },
+              {
+                "x": 18,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 24,
+            "y": 3
+          },
+          "to": {
+            "x": 20,
+            "y": 3
+          },
+          "type": "wait",
+          "unitId": "unit_4",
+          "data": {
+            "path": [
+              {
+                "x": 24,
+                "y": 3
+              },
+              {
+                "x": 23,
+                "y": 3
+              },
+              {
+                "x": 22,
+                "y": 3
+              },
+              {
+                "x": 21,
+                "y": 3
+              },
+              {
+                "x": 20,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 23,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "targetPos": {
+              "x": 23,
+              "y": 3
+            },
+            "teamId": 2,
+            "unitType": "BIRD4"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "7251e898282b3aab",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 3,
+      "timestamp": "2026-02-02T21:54:57.792Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 8,
+            "y": 2
+          },
+          "to": {
+            "x": 11,
+            "y": 3
+          },
+          "type": "capture",
+          "unitId": "unit_3",
+          "targetId": "food_14",
+          "data": {
+            "path": [
+              {
+                "y": 2,
+                "x": 8
+              },
+              {
+                "y": 3,
+                "x": 8
+              },
+              {
+                "y": 3,
+                "x": 9
+              },
+              {
+                "y": 3,
+                "x": 10
+              },
+              {
+                "y": 3,
+                "x": 11
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 2,
+            "y": 3
+          },
+          "to": {
+            "x": 7,
+            "y": 2
+          },
+          "type": "capture",
+          "unitId": "unit_25",
+          "targetId": "food_10",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 2
+              },
+              {
+                "y": 3,
+                "x": 3
+              },
+              {
+                "y": 3,
+                "x": 4
+              },
+              {
+                "y": 3,
+                "x": 5
+              },
+              {
+                "y": 3,
+                "x": 6
+              },
+              {
+                "y": 3,
+                "x": 7
+              },
+              {
+                "y": 2,
+                "x": 7
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 7,
+            "y": 1
+          },
+          "to": {
+            "x": 11,
+            "y": 1
+          },
+          "type": "take_off",
+          "unitId": "unit_1",
+          "data": {
+            "path": [
+              {
+                "y": 1,
+                "x": 7
+              },
+              {
+                "y": 1,
+                "x": 8
+              },
+              {
+                "y": 1,
+                "x": 9
+              },
+              {
+                "y": 1,
+                "x": 10
+              },
+              {
+                "y": 1,
+                "x": 11
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 5,
+            "y": 3
+          },
+          "to": {
+            "x": 9,
+            "y": 3
+          },
+          "type": "land",
+          "unitId": "unit_2",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 5
+              },
+              {
+                "y": 3,
+                "x": 6
+              },
+              {
+                "y": 3,
+                "x": 7
+              },
+              {
+                "y": 3,
+                "x": 8
+              },
+              {
+                "y": 3,
+                "x": 9
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "targetPos": {
+              "y": 3,
+              "x": 2
+            },
+            "teamId": 1,
+            "unitType": "BIRD4"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "dd5d3ca1c4224597",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 4,
+      "timestamp": "2026-02-02T21:58:03.998Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 23,
+            "y": 3
+          },
+          "to": {
+            "x": 18,
+            "y": 3
+          },
+          "type": "wait",
+          "unitId": "unit_26",
+          "data": {
+            "path": [
+              {
+                "x": 23,
+                "y": 3
+              },
+              {
+                "x": 22,
+                "y": 3
+              },
+              {
+                "x": 21,
+                "y": 3
+              },
+              {
+                "x": 20,
+                "y": 3
+              },
+              {
+                "x": 19,
+                "y": 3
+              },
+              {
+                "x": 18,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 18,
+            "y": 1
+          },
+          "to": {
+            "x": 16,
+            "y": 3
+          },
+          "type": "wait",
+          "unitId": "unit_5",
+          "data": {
+            "path": [
+              {
+                "x": 18,
+                "y": 1
+              },
+              {
+                "x": 17,
+                "y": 1
+              },
+              {
+                "x": 17,
+                "y": 2
+              },
+              {
+                "x": 17,
+                "y": 3
+              },
+              {
+                "x": 16,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 20,
+            "y": 3
+          },
+          "to": {
+            "x": 20,
+            "y": 7
+          },
+          "type": "wait",
+          "unitId": "unit_4",
+          "data": {
+            "path": [
+              {
+                "x": 20,
+                "y": 3
+              },
+              {
+                "x": 20,
+                "y": 4
+              },
+              {
+                "x": 20,
+                "y": 5
+              },
+              {
+                "x": 20,
+                "y": 6
+              },
+              {
+                "x": 20,
+                "y": 7
+              }
+            ]
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_6",
+          "targetId": "food_12"
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "d70f3f93cb326752",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 5,
+      "timestamp": "2026-02-02T22:06:19.918Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 9,
+            "y": 3
+          },
+          "to": {
+            "x": 10,
+            "y": 1
+          },
+          "type": "capture",
+          "unitId": "unit_2",
+          "targetId": "food_16",
+          "data": {
+            "path": [
+              {
+                "x": 9,
+                "y": 3
+              },
+              {
+                "x": 10,
+                "y": 3
+              },
+              {
+                "x": 10,
+                "y": 2
+              },
+              {
+                "x": 10,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 11,
+            "y": 1
+          },
+          "to": {
+            "x": 12,
+            "y": 1
+          },
+          "type": "wait",
+          "unitId": "unit_1",
+          "data": {
+            "path": [
+              {
+                "x": 11,
+                "y": 1
+              },
+              {
+                "x": 12,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_3",
+          "targetId": "food_14"
+        },
+        {
+          "from": {
+            "x": 7,
+            "y": 2
+          },
+          "to": {
+            "x": 12,
+            "y": 3
+          },
+          "type": "take_off",
+          "unitId": "unit_25",
+          "data": {
+            "path": [
+              {
+                "x": 7,
+                "y": 2
+              },
+              {
+                "x": 8,
+                "y": 2
+              },
+              {
+                "x": 9,
+                "y": 2
+              },
+              {
+                "x": 10,
+                "y": 2
+              },
+              {
+                "x": 11,
+                "y": 2
+              },
+              {
+                "x": 12,
+                "y": 2
+              },
+              {
+                "x": 12,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 2,
+            "y": 3
+          },
+          "to": {
+            "x": 5,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_27",
+          "data": {
+            "path": [
+              {
+                "x": 2,
+                "y": 3
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 4,
+                "y": 3
+              },
+              {
+                "x": 5,
+                "y": 3
+              },
+              {
+                "x": 5,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "unitType": "BIRD3",
+            "teamId": 1,
+            "targetPos": {
+              "x": 2,
+              "y": 3
+            }
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "a962a5c78ae8b525",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 6,
+      "timestamp": "2026-02-02T22:10:18.408Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 20,
+            "y": 7
+          },
+          "to": {
+            "x": 18,
+            "y": 7
+          },
+          "type": "capture",
+          "unitId": "unit_4",
+          "targetId": "nest_23",
+          "data": {
+            "path": [
+              {
+                "x": 20,
+                "y": 7
+              },
+              {
+                "x": 19,
+                "y": 7
+              },
+              {
+                "x": 18,
+                "y": 7
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 18,
+            "y": 3
+          },
+          "to": {
+            "x": 13,
+            "y": 3
+          },
+          "type": "attack",
+          "unitId": "unit_26",
+          "targetId": "unit_25",
+          "data": {
+            "path": [
+              {
+                "x": 18,
+                "y": 3
+              },
+              {
+                "x": 17,
+                "y": 3
+              },
+              {
+                "x": 16,
+                "y": 3
+              },
+              {
+                "x": 15,
+                "y": 3
+              },
+              {
+                "x": 14,
+                "y": 3
+              },
+              {
+                "x": 13,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 16,
+            "y": 3
+          },
+          "to": {
+            "x": 15,
+            "y": 6
+          },
+          "type": "wait",
+          "unitId": "unit_5",
+          "data": {
+            "path": [
+              {
+                "x": 16,
+                "y": 3
+              },
+              {
+                "x": 15,
+                "y": 3
+              },
+              {
+                "x": 15,
+                "y": 4
+              },
+              {
+                "x": 15,
+                "y": 5
+              },
+              {
+                "x": 15,
+                "y": 6
+              }
+            ]
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_6",
+          "targetId": "food_12"
+        },
+        {
+          "to": {
+            "x": 23,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "targetPos": {
+              "x": 23,
+              "y": 3
+            },
+            "teamId": 2,
+            "unitType": "BIRD9"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "b2c995b520c77d45",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 7,
+      "timestamp": "2026-02-02T22:12:53.533Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 12,
+            "y": 3
+          },
+          "to": {
+            "x": 13,
+            "y": 3
+          },
+          "type": "attack",
+          "unitId": "unit_25",
+          "targetId": "unit_26",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 12
+              },
+              {
+                "y": 3,
+                "x": 13
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 2,
+            "y": 3
+          },
+          "to": {
+            "x": 4,
+            "y": 5
+          },
+          "type": "wait",
+          "unitId": "unit_28",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 2
+              },
+              {
+                "y": 3,
+                "x": 3
+              },
+              {
+                "y": 3,
+                "x": 4
+              },
+              {
+                "y": 4,
+                "x": 4
+              },
+              {
+                "y": 5,
+                "x": 4
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 5,
+            "y": 2
+          },
+          "to": {
+            "x": 7,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_27",
+          "data": {
+            "path": [
+              {
+                "y": 2,
+                "x": 5
+              },
+              {
+                "y": 2,
+                "x": 6
+              },
+              {
+                "y": 2,
+                "x": 7
+              }
+            ]
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_2",
+          "targetId": "food_16"
+        },
+        {
+          "from": {
+            "x": 12,
+            "y": 1
+          },
+          "to": {
+            "x": 13,
+            "y": 2
+          },
+          "type": "attack",
+          "unitId": "unit_1",
+          "targetId": "unit_26",
+          "data": {
+            "path": [
+              {
+                "y": 1,
+                "x": 12
+              },
+              {
+                "y": 2,
+                "x": 12
+              },
+              {
+                "y": 2,
+                "x": 13
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "6421fdb7858d6ea1",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 8,
+      "timestamp": "2026-02-02T22:21:20.168Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "type": "capture",
+          "unitId": "unit_4",
+          "targetId": "nest_23"
+        },
+        {
+          "from": {
+            "x": 15,
+            "y": 6
+          },
+          "to": {
+            "x": 13,
+            "y": 8
+          },
+          "type": "wait",
+          "unitId": "unit_5",
+          "data": {
+            "path": [
+              {
+                "x": 15,
+                "y": 6
+              },
+              {
+                "x": 15,
+                "y": 7
+              },
+              {
+                "x": 14,
+                "y": 7
+              },
+              {
+                "x": 14,
+                "y": 8
+              },
+              {
+                "x": 13,
+                "y": 8
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "unitId": "unit_6"
+        },
+        {
+          "from": {
+            "x": 23,
+            "y": 3
+          },
+          "to": {
+            "x": 16,
+            "y": 3
+          },
+          "type": "wait",
+          "unitId": "unit_29",
+          "data": {
+            "path": [
+              {
+                "x": 23,
+                "y": 3
+              },
+              {
+                "x": 22,
+                "y": 3
+              },
+              {
+                "x": 21,
+                "y": 3
+              },
+              {
+                "x": 20,
+                "y": 3
+              },
+              {
+                "x": 19,
+                "y": 3
+              },
+              {
+                "x": 18,
+                "y": 3
+              },
+              {
+                "x": 17,
+                "y": 3
+              },
+              {
+                "x": 16,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "3d9caa64ca155b5a",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 9,
+      "timestamp": "2026-02-02T22:30:54.357Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 4,
+            "y": 5
+          },
+          "to": {
+            "x": 5,
+            "y": 8
+          },
+          "type": "wait",
+          "unitId": "unit_28",
+          "data": {
+            "path": [
+              {
+                "x": 4,
+                "y": 5
+              },
+              {
+                "x": 4,
+                "y": 6
+              },
+              {
+                "x": 4,
+                "y": 7
+              },
+              {
+                "x": 4,
+                "y": 8
+              },
+              {
+                "x": 5,
+                "y": 8
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 13,
+            "y": 3
+          },
+          "to": {
+            "x": 12,
+            "y": 3
+          },
+          "type": "attack",
+          "unitId": "unit_25",
+          "targetId": "unit_26",
+          "data": {
+            "path": [
+              {
+                "x": 13,
+                "y": 3
+              },
+              {
+                "x": 12,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "type": "attack",
+          "unitId": "unit_1",
+          "targetId": "unit_26"
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_3",
+          "targetId": "food_14"
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_2",
+          "targetId": "food_16"
+        },
+        {
+          "from": {
+            "x": 7,
+            "y": 2
+          },
+          "to": {
+            "x": 12,
+            "y": 2
+          },
+          "type": "take_off",
+          "unitId": "unit_27",
+          "data": {
+            "path": [
+              {
+                "x": 7,
+                "y": 2
+              },
+              {
+                "x": 8,
+                "y": 2
+              },
+              {
+                "x": 9,
+                "y": 2
+              },
+              {
+                "x": 10,
+                "y": 2
+              },
+              {
+                "x": 11,
+                "y": 2
+              },
+              {
+                "x": 12,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "teamId": 1,
+            "targetPos": {
+              "x": 2,
+              "y": 3
+            },
+            "unitType": "BIRD5"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "2dbbacd24ad428b4",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 10,
+      "timestamp": "2026-02-02T22:39:54.151Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 13,
+            "y": 3
+          },
+          "to": {
+            "x": 10,
+            "y": 3
+          },
+          "type": "attack",
+          "unitId": "unit_26",
+          "targetId": "unit_3",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 13
+              },
+              {
+                "y": 3,
+                "x": 12
+              },
+              {
+                "y": 3,
+                "x": 11
+              },
+              {
+                "y": 3,
+                "x": 10
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 16,
+            "y": 3
+          },
+          "to": {
+            "x": 11,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_29",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 16
+              },
+              {
+                "y": 3,
+                "x": 15
+              },
+              {
+                "y": 3,
+                "x": 14
+              },
+              {
+                "y": 3,
+                "x": 13
+              },
+              {
+                "y": 3,
+                "x": 12
+              },
+              {
+                "y": 3,
+                "x": 11
+              },
+              {
+                "y": 2,
+                "x": 11
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 18,
+            "y": 7
+          },
+          "to": {
+            "x": 14,
+            "y": 7
+          },
+          "type": "wait",
+          "unitId": "unit_4",
+          "data": {
+            "path": [
+              {
+                "y": 7,
+                "x": 18
+              },
+              {
+                "y": 7,
+                "x": 17
+              },
+              {
+                "y": 7,
+                "x": 16
+              },
+              {
+                "y": 7,
+                "x": 15
+              },
+              {
+                "y": 7,
+                "x": 14
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 18,
+            "y": 7
+          },
+          "type": "build",
+          "data": {
+            "unitType": "BIRD1",
+            "targetPos": {
+              "y": 7,
+              "x": 18
+            },
+            "teamId": 2
+          }
+        },
+        {
+          "from": {
+            "x": 20,
+            "y": 2
+          },
+          "to": {
+            "x": 17,
+            "y": 2
+          },
+          "type": "capture",
+          "unitId": "unit_6",
+          "targetId": "food_15",
+          "data": {
+            "path": [
+              {
+                "y": 2,
+                "x": 20
+              },
+              {
+                "y": 2,
+                "x": 19
+              },
+              {
+                "y": 2,
+                "x": 18
+              },
+              {
+                "y": 2,
+                "x": 17
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "70c04b02831b034f",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 11,
+      "timestamp": "2026-02-02T22:55:58.465Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 5,
+            "y": 8
+          },
+          "to": {
+            "x": 7,
+            "y": 9
+          },
+          "type": "capture",
+          "unitId": "unit_28",
+          "targetId": "food_9",
+          "data": {
+            "path": [
+              {
+                "y": 8,
+                "x": 5
+              },
+              {
+                "y": 8,
+                "x": 6
+              },
+              {
+                "y": 8,
+                "x": 7
+              },
+              {
+                "y": 9,
+                "x": 7
+              }
+            ]
+          }
+        },
+        {
+          "type": "attack",
+          "unitId": "unit_3",
+          "targetId": "unit_26"
+        },
+        {
+          "type": "attack",
+          "unitId": "unit_27",
+          "targetId": "unit_29"
+        },
+        {
+          "from": {
+            "x": 10,
+            "y": 1
+          },
+          "to": {
+            "x": 11,
+            "y": 1
+          },
+          "type": "attack",
+          "unitId": "unit_2",
+          "targetId": "unit_29",
+          "data": {
+            "path": [
+              {
+                "y": 1,
+                "x": 10
+              },
+              {
+                "y": 1,
+                "x": 11
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 2,
+            "y": 3
+          },
+          "to": {
+            "x": 5,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_31",
+          "data": {
+            "path": [
+              {
+                "y": 3,
+                "x": 2
+              },
+              {
+                "y": 3,
+                "x": 3
+              },
+              {
+                "y": 3,
+                "x": 4
+              },
+              {
+                "y": 3,
+                "x": 5
+              },
+              {
+                "y": 2,
+                "x": 5
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "targetPos": {
+              "y": 3,
+              "x": 2
+            },
+            "teamId": 1,
+            "unitType": "BIRD4"
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "56e44ec3f12726d0",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 12,
+      "timestamp": "2026-02-03T04:47:38.797Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "type": "capture",
+          "unitId": "unit_6",
+          "targetId": "food_15"
+        },
+        {
+          "from": {
+            "x": 18,
+            "y": 7
+          },
+          "to": {
+            "x": 17,
+            "y": 9
+          },
+          "type": "capture",
+          "unitId": "unit_32",
+          "targetId": "food_8",
+          "data": {
+            "path": [
+              {
+                "y": 7,
+                "x": 18
+              },
+              {
+                "y": 8,
+                "x": 18
+              },
+              {
+                "y": 9,
+                "x": 18
+              },
+              {
+                "y": 9,
+                "x": 17
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 18,
+            "y": 7
+          },
+          "type": "build",
+          "data": {
+            "unitType": "BIRD9",
+            "targetPos": {
+              "y": 7,
+              "x": 18
+            },
+            "teamId": 2
+          }
+        },
+        {
+          "from": {
+            "x": 13,
+            "y": 8
+          },
+          "to": {
+            "x": 12,
+            "y": 9
+          },
+          "type": "capture",
+          "unitId": "unit_5",
+          "targetId": "food_7",
+          "data": {
+            "path": [
+              {
+                "y": 8,
+                "x": 13
+              },
+              {
+                "y": 8,
+                "x": 12
+              },
+              {
+                "y": 9,
+                "x": 12
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 14,
+            "y": 7
+          },
+          "to": {
+            "x": 12,
+            "y": 7
+          },
+          "type": "capture",
+          "unitId": "unit_4",
+          "targetId": "nest_24",
+          "data": {
+            "path": [
+              {
+                "y": 7,
+                "x": 14
+              },
+              {
+                "y": 7,
+                "x": 13
+              },
+              {
+                "y": 7,
+                "x": 12
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 11,
+            "y": 2
+          },
+          "to": {
+            "x": 11,
+            "y": 9
+          },
+          "type": "wait",
+          "unitId": "unit_29",
+          "data": {
+            "path": [
+              {
+                "y": 2,
+                "x": 11
+              },
+              {
+                "y": 3,
+                "x": 11
+              },
+              {
+                "y": 4,
+                "x": 11
+              },
+              {
+                "y": 5,
+                "x": 11
+              },
+              {
+                "y": 6,
+                "x": 11
+              },
+              {
+                "y": 7,
+                "x": 11
+              },
+              {
+                "y": 8,
+                "x": 11
+              },
+              {
+                "y": 9,
+                "x": 11
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "6f681b56f7a805ae",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "7779c3fbdd06d0b8e1ca3b0884a54a11b80cc3b467964ed9fbf1550cd23e8cf1",
+      "turnNumber": 13,
+      "timestamp": "2026-02-03T10:02:41.103Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "type": "capture",
+          "unitId": "unit_28",
+          "targetId": "food_9"
+        },
+        {
+          "from": {
+            "x": 2,
+            "y": 3
+          },
+          "to": {
+            "x": 4,
+            "y": 6
+          },
+          "type": "wait",
+          "unitId": "unit_33",
+          "data": {
+            "path": [
+              {
+                "x": 2,
+                "y": 3
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 4,
+                "y": 3
+              },
+              {
+                "x": 4,
+                "y": 4
+              },
+              {
+                "x": 4,
+                "y": 5
+              },
+              {
+                "x": 4,
+                "y": 6
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 5,
+            "y": 2
+          },
+          "to": {
+            "x": 7,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_31",
+          "data": {
+            "path": [
+              {
+                "x": 5,
+                "y": 2
+              },
+              {
+                "x": 6,
+                "y": 2
+              },
+              {
+                "x": 7,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 2,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "teamId": 1,
+            "targetPos": {
+              "x": 2,
+              "y": 3
+            },
+            "unitType": "BIRD4"
+          }
+        },
+        {
+          "from": {
+            "x": 11,
+            "y": 3
+          },
+          "to": {
+            "x": 15,
+            "y": 3
+          },
+          "type": "capture",
+          "unitId": "unit_3",
+          "targetId": "food_17",
+          "data": {
+            "path": [
+              {
+                "x": 11,
+                "y": 3
+              },
+              {
+                "x": 12,
+                "y": 3
+              },
+              {
+                "x": 13,
+                "y": 3
+              },
+              {
+                "x": 14,
+                "y": 3
+              },
+              {
+                "x": 15,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 12,
+            "y": 2
+          },
+          "to": {
+            "x": 15,
+            "y": 2
+          },
+          "type": "land",
+          "unitId": "unit_27",
+          "data": {
+            "path": [
+              {
+                "x": 12,
+                "y": 2
+              },
+              {
+                "x": 13,
+                "y": 2
+              },
+              {
+                "x": 14,
+                "y": 2
+              },
+              {
+                "x": 15,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "from": {
+            "x": 11,
+            "y": 1
+          },
+          "to": {
+            "x": 14,
+            "y": 1
+          },
+          "type": "capture",
+          "unitId": "unit_2",
+          "targetId": "food_11",
+          "data": {
+            "path": [
+              {
+                "x": 11,
+                "y": 1
+              },
+              {
+                "x": 12,
+                "y": 1
+              },
+              {
+                "x": 13,
+                "y": 1
+              },
+              {
+                "x": 14,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    },
+    {
+      "turnId": "901497ff6e2afc24",
+      "battleId": "b9e7227a4c73650c",
+      "deviceId": "63acfa935fcf1053595b0421d1134e86e30ec49e63d630aea252da4b1ae1e155",
+      "turnNumber": 14,
+      "timestamp": "2026-02-03T16:12:32.415Z",
+      "isValid": true,
+      "validationErrors": [],
+      "actions": [
+        {
+          "from": {
+            "x": 17,
+            "y": 2
+          },
+          "to": {
+            "x": 15,
+            "y": 1
+          },
+          "type": "attack",
+          "unitId": "unit_6",
+          "targetId": "unit_2",
+          "data": {
+            "path": [
+              {
+                "x": 17,
+                "y": 2
+              },
+              {
+                "x": 16,
+                "y": 2
+              },
+              {
+                "x": 15,
+                "y": 2
+              },
+              {
+                "x": 15,
+                "y": 1
+              }
+            ]
+          }
+        },
+        {
+          "to": {
+            "x": 23,
+            "y": 3
+          },
+          "type": "build",
+          "data": {
+            "teamId": 2,
+            "targetPos": {
+              "x": 23,
+              "y": 3
+            },
+            "unitType": "BIRD3"
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_5",
+          "targetId": "food_7"
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_32",
+          "targetId": "food_8"
+        },
+        {
+          "from": {
+            "x": 18,
+            "y": 7
+          },
+          "to": {
+            "x": 16,
+            "y": 3
+          },
+          "type": "attack",
+          "unitId": "unit_34",
+          "targetId": "unit_3",
+          "data": {
+            "path": [
+              {
+                "x": 18,
+                "y": 7
+              },
+              {
+                "x": 17,
+                "y": 7
+              },
+              {
+                "x": 17,
+                "y": 6
+              },
+              {
+                "x": 17,
+                "y": 5
+              },
+              {
+                "x": 17,
+                "y": 4
+              },
+              {
+                "x": 17,
+                "y": 3
+              },
+              {
+                "x": 16,
+                "y": 3
+              }
+            ]
+          }
+        },
+        {
+          "type": "capture",
+          "unitId": "unit_4",
+          "targetId": "nest_24"
+        },
+        {
+          "to": {
+            "x": 18,
+            "y": 7
+          },
+          "type": "build",
+          "data": {
+            "teamId": 2,
+            "targetPos": {
+              "x": 18,
+              "y": 7
+            },
+            "unitType": "BIRD2"
+          }
+        },
+        {
+          "from": {
+            "x": 11,
+            "y": 9
+          },
+          "to": {
+            "x": 11,
+            "y": 2
+          },
+          "type": "wait",
+          "unitId": "unit_29",
+          "data": {
+            "path": [
+              {
+                "x": 11,
+                "y": 9
+              },
+              {
+                "x": 11,
+                "y": 8
+              },
+              {
+                "x": 11,
+                "y": 7
+              },
+              {
+                "x": 11,
+                "y": 6
+              },
+              {
+                "x": 11,
+                "y": 5
+              },
+              {
+                "x": 11,
+                "y": 4
+              },
+              {
+                "x": 11,
+                "y": 3
+              },
+              {
+                "x": 11,
+                "y": 2
+              }
+            ]
+          }
+        },
+        {
+          "type": "end_turn"
+        }
+      ]
+    }
+  ]
+}

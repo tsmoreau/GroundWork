@@ -1,0 +1,51 @@
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[env]
+PORT = "5000"
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["npm", "run", "start"]
+build = ["npm", "run", "build"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_SECRET = "nkYb8eVjxsZ0EJVgaZS6MiptfJDm52Pn4UrCEqW16QE="
+ADMIN_EMAILS = "terrencestasse@gmail.com"
+
+[userenv.development]
+NEXTAUTH_URL = "https://2cab0281-ae00-46c0-8f54-a582739d27c1-00-1uml8a1nbp01o.worf.replit.dev"
+
+[userenv.production]
+NEXTAUTH_URL = "https://birdwars.app"

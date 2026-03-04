@@ -1,0 +1,343 @@
+# Groundwork — Replit Agent Build Prompt
+
+## Overview
+
+Build **Groundwork**, a collaborative PWA where users can draw shapes, lines, and text over Google Maps 3D photorealistic satellite imagery to create property layout plans. Users manage projects from a directory, each project pinned to a specific map view. Multiple users can collaborate on the same project with role-based permissions.
+
+---
+
+## Existing Codebase
+
+This project is forked from an existing Next.js + MongoDB + Google OAuth application. The following is already set up and **must not be refactored, restructured, or replaced**:
+
+- Next.js application framework
+- MongoDB connection (singleton client pattern)
+- Google OAuth authentication flow
+- Basic app shell
+
+**Important change from the base project:** The existing auth restricts login to a whitelist stored in secrets. **Remove this restriction.** Any user who authenticates via Google OAuth should be allowed in. User records should be created in MongoDB on first login.
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js (existing)
+- **Database:** MongoDB (existing)
+- **Auth:** Google OAuth (existing, remove whitelist restriction)
+- **Map:** Google Maps JavaScript API with Photorealistic 3D Tiles (Map3DElement)
+- **Drawing/Editing:** deck.gl with @deck.gl/google-maps and editable-layers (@nebula.gl/layers)
+- **PWA:** Installable, online-only. No offline/service worker caching of app data needed.
+
+### Required Google Cloud APIs
+
+The following must be enabled on the Google Cloud project (user will configure these manually — the app just needs to use them):
+
+- Maps JavaScript API
+- Map Tiles API (for Photorealistic 3D Tiles)
+- OAuth consent screen + credentials (already configured from base project)
+
+The Maps API key and OAuth credentials are separate. The Maps API key goes in an environment variable (e.g., `NEXT_PUBLIC_GOOGLE_MAPS_KEY`) and is used client-side to load the map. OAuth credentials are already wired up.
+
+---
+
+## Core Features
+
+### 1. Project Directory (Top Level)
+
+The landing page after login is a project directory showing all projects the user has access to.
+
+- List view of projects (name, thumbnail/snapshot, role, last modified)
+- **Create** new project
+- **Rename** project
+- **Duplicate** project (deep copy all features, layers, snapshot — new project, user becomes owner)
+- **Delete** project (owner only, with confirmation)
+- Clicking a project opens the map view, flying to the project's stored snapshot
+
+### 2. Project Creation Flow
+
+When creating a new project:
+
+1. User enters a project name
+2. Map loads at a default view (or user's current location if available)
+3. User navigates the map — pan, zoom — to find the property
+4. User explicitly **sets the snapshot** (a button that captures current center, zoom, and heading as the project's home view)
+5. Snapshot must be set before drawing tools are available
+6. After snapshot is set, drawing tools become active
+
+**Resetting the snapshot:** The option to re-set the snapshot exists but should not be prominently surfaced. Bury it in a settings/gear menu for the project. Resetting the snapshot does not affect existing drawn features.
+
+### 3. Map View
+
+- Google Maps Photorealistic 3D Tiles as the base layer
+- Camera locked to top-down (tilt: 0) for v1
+- On project open, map automatically animates to the stored snapshot (center, zoom, heading)
+- Standard map interaction: pan and zoom (pinch on mobile)
+- Toggle between map interaction mode and draw mode (map panning is disabled while drawing)
+
+### 4. Drawing Tools
+
+Implement using deck.gl editable-layers. All geometry is stored in GeoJSON (lat/lng coordinates) so it survives any camera transformation.
+
+**Shape tools:**
+- Polygon (click vertices to define, double-click or tap to close)
+- Rectangle (click-drag)
+- Circle (click center, drag radius)
+
+**Line tools:**
+- Polyline (click to add points, double-click to finish)
+- Line with style options:
+  - Solid, dashed, dotted stroke styles
+  - Arrow on start, end, both, or neither
+
+**Text tool:**
+- Click to place a text label at a lat/lng position
+- Inline text editing on placement
+- Tap to re-edit text content
+
+### 5. Feature Properties
+
+Each feature (shape, line, or text) has editable properties:
+
+- **Fill color** (shapes only) with opacity
+- **Stroke color**
+- **Stroke width**
+- **Stroke style** (solid, dashed, dotted) — for all shapes and lines
+- **Arrow heads** (lines only) — none, start, end, both
+- **Label** — optional text label displayed on or near the feature
+- **Font size** (text features)
+- **Layer assignment** — which layer this feature belongs to
+
+A properties panel should appear when a feature is selected, allowing these to be edited. Keep the UI minimal — a small floating panel or bottom sheet on mobile.
+
+### 6. Selection and Editing
+
+- **Tap/click** a feature to select it
+- **Selected features** show edit handles (vertices for polygons/lines, bounding box for rectangles/circles/text)
+- **Drag** a selected feature to move it
+- **Drag handles** to resize or reshape
+- **Drag vertices** on polygons and polylines to reshape
+- **Delete** selected feature (delete key or button)
+- **Multi-select** (shift-click or lasso) for grouping operations
+
+### 7. Grouping
+
+- Select multiple features and group them
+- **Grouped features** move and transform as a unit
+- Groups can share a color (applying a color to the group applies it to all members)
+- **Ungroup** to return to individual feature editing
+- Groups persist in the database (stored as a group ID on each member feature, plus a groups collection with shared properties)
+
+### 8. Layers
+
+- Each project has named layers (e.g., "Buildings," "Landscaping," "Utilities")
+- A default layer exists on project creation
+- Users can **create**, **rename**, **delete**, and **reorder** layers
+- Each feature belongs to exactly one layer
+- **Toggle layer visibility** on/off (hides/shows all features on that layer)
+- Layer panel in the UI — collapsible sidebar or bottom sheet
+- Deleting a layer prompts: delete all features on it, or move them to another layer
+
+### 9. Undo/Redo
+
+- Full undo/redo stack for drawing and editing actions within a session
+- Standard keyboard shortcuts (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
+- Undo button in the toolbar for mobile
+
+### 10. Collaboration and Permissions
+
+**Roles:**
+- **Owner** — full control, can invite/remove users, transfer ownership, delete project
+- **Editor** — can draw, edit, delete features, manage layers
+- **Viewer** — can view the project and toggle layers, cannot modify anything
+
+**Project visibility:**
+- **Private** — only invited users can see or access the project
+- **Public** — anyone with the link can view. Editing still requires an explicit editor/owner invite.
+
+**Invite flow:**
+- Owner or editor invites by email
+- If the email matches an existing user, they get access immediately
+- If not, access is granted when they eventually sign up with that email
+
+**Ownership transfer:**
+- Owner can promote an editor to owner
+- Original owner becomes an editor
+
+**Collaboration sync (v1):**
+- Poll-based. Client refetches project data on a regular interval (e.g., every 10-15 seconds) and on window focus.
+- No real-time cursors or live presence indicators in v1.
+- Optimistic UI for the local user's own edits; poll brings in other users' changes.
+
+### 11. Export
+
+- **Export to PNG** — captures the current map view with all visible features rendered
+- **Export to PDF** — same as PNG but wrapped in a PDF with the project name as a title
+- Uses the current viewport, not the stored snapshot (so the user can frame the view they want before exporting)
+
+### 12. PWA
+
+- Web app manifest for installability
+- Responsive layout — works on desktop and mobile/tablet
+- Touch-first interaction design for drawing tools (fat finger friendly tap targets, no hover-dependent UI)
+- No offline data caching needed — app requires an internet connection
+
+---
+
+## Data Model (MongoDB)
+
+### `users` collection
+
+```json
+{
+  "_id": "ObjectId",
+  "email": "string",
+  "name": "string",
+  "image": "string (Google profile image URL)",
+  "createdAt": "Date"
+}
+```
+
+### `projects` collection
+
+```json
+{
+  "_id": "ObjectId",
+  "name": "string",
+  "snapshot": {
+    "center": { "lat": "number", "lng": "number" },
+    "zoom": "number",
+    "heading": "number"
+  },
+  "layers": [
+    {
+      "id": "string (uuid)",
+      "name": "string",
+      "visible": "boolean",
+      "order": "number"
+    }
+  ],
+  "createdBy": "ObjectId (user ref)",
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+### `projectMembers` collection
+
+```json
+{
+  "_id": "ObjectId",
+  "projectId": "ObjectId",
+  "userId": "ObjectId (null if pending invite)",
+  "email": "string",
+  "role": "string (owner | editor | viewer)",
+  "invitedAt": "Date"
+}
+```
+
+### `features` collection
+
+```json
+{
+  "_id": "ObjectId",
+  "projectId": "ObjectId",
+  "layerId": "string (matches layer id in project)",
+  "groupId": "string | null",
+  "type": "string (polygon | rectangle | circle | polyline | line | text)",
+  "geometry": "GeoJSON Geometry object",
+  "properties": {
+    "fillColor": "string (hex)",
+    "fillOpacity": "number",
+    "strokeColor": "string (hex)",
+    "strokeWidth": "number",
+    "strokeStyle": "string (solid | dashed | dotted)",
+    "arrowStart": "boolean",
+    "arrowEnd": "boolean",
+    "label": "string",
+    "text": "string (for text features)",
+    "fontSize": "number (for text features)"
+  },
+  "createdBy": "ObjectId",
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+### `groups` collection
+
+```json
+{
+  "_id": "ObjectId",
+  "projectId": "ObjectId",
+  "groupId": "string (uuid, referenced by features)",
+  "sharedProperties": {
+    "fillColor": "string | null",
+    "strokeColor": "string | null"
+  }
+}
+```
+
+---
+
+## API Routes
+
+All API routes are under `/api/`. Use Next.js API routes (or Route Handlers if using App Router). All mutating endpoints require authentication. Permission checks must validate the user's role on the project for every request.
+
+### Projects
+- `GET /api/projects` — list projects for the authenticated user
+- `POST /api/projects` — create a project
+- `GET /api/projects/[id]` — get project details
+- `PUT /api/projects/[id]` — update project (name, snapshot, layers)
+- `DELETE /api/projects/[id]` — delete project (owner only)
+- `POST /api/projects/[id]/duplicate` — duplicate a project
+
+### Members
+- `GET /api/projects/[id]/members` — list members
+- `POST /api/projects/[id]/members` — invite a member (email + role)
+- `PUT /api/projects/[id]/members/[memberId]` — change role / transfer ownership
+- `DELETE /api/projects/[id]/members/[memberId]` — remove a member
+
+### Features
+- `GET /api/projects/[id]/features` — get all features for a project
+- `POST /api/projects/[id]/features` — create a feature
+- `PUT /api/projects/[id]/features/[featureId]` — update a feature
+- `DELETE /api/projects/[id]/features/[featureId]` — delete a feature
+- `POST /api/projects/[id]/features/bulk` — bulk create/update/delete (for group operations and undo/redo)
+
+### Groups
+- `POST /api/projects/[id]/groups` — create a group from selected feature IDs
+- `PUT /api/projects/[id]/groups/[groupId]` — update shared group properties
+- `DELETE /api/projects/[id]/groups/[groupId]` — ungroup (removes groupId from member features, deletes group)
+
+---
+
+## UI Structure
+
+### Desktop Layout
+- **Top bar:** Groundwork logo, user avatar, project name (when in a project), back to directory
+- **Left sidebar (in project view):** Layer panel — list of layers, visibility toggles, add/rename/delete
+- **Bottom toolbar (in project view):** Drawing tools, select tool, undo/redo
+- **Right floating panel:** Feature properties (appears on selection)
+- **Map:** fills remaining space
+
+### Mobile Layout
+- **Top bar:** Compact — back button, project name, menu
+- **Bottom toolbar:** Drawing tools as icon buttons, swipeable if needed
+- **Bottom sheet:** Properties panel and layer panel as pull-up sheets
+- **Map:** full screen behind everything
+
+### Drawing Mode Toggle
+Clear visual state for whether the user is in **pan mode** (interacting with the map) or **draw mode** (interacting with the drawing layer). A prominent toggle or the act of selecting a drawing tool enters draw mode. Selecting the pan/hand tool returns to pan mode.
+
+---
+
+## Important Implementation Notes
+
+1. **Do not refactor the existing MongoDB connection, auth flow, or project structure.** Build on top of what exists.
+2. **All feature geometry must be stored as GeoJSON.** This is critical for deck.gl compatibility and future 3D work.
+3. **deck.gl editable-layers handles the drawing interaction.** Do not build custom raycasting or vertex editing — use the library's built-in editing modes.
+4. **The Google Maps 3D view uses `Map3DElement`.** Use `@deck.gl/google-maps` for the integration layer.
+5. **Touch targets must be minimum 44x44px** for mobile usability.
+6. **Polling for collaboration sync** should be configurable (default 10 seconds) and pause when the browser tab is not visible.
+7. **Color values** should be stored as hex strings. Use a simple color picker component (a small preset palette is fine for v1, no need for a full color wheel).
+8. **The snapshot is the source of truth for the map view on project load.** Always fly to it when opening a project.

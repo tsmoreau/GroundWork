@@ -1,0 +1,324 @@
+-- source/screens/versusGameList.lua
+-- Battle list subscreen for versus mode
+-- FIXED: Moved import to top level to prevent runtime crash.
+
+local gfx <const> = playdate.graphics
+local pd <const> = playdate
+
+-- FIX: Import the scene at the top level, not inside a function
+local VersusCreateGameScene <const> = import "screens/versusCreateGame"
+
+local VersusGameList = {}
+VersusGameList.__index = VersusGameList
+
+local CONFIG = {
+    leftPanel = {
+        x = 10, y = 60,
+        width = 120, height = 170,
+        z = 70, cornerRadius = 8
+    },
+    rightPanel = {
+        x = 140, y = 60,
+        width = 250, height = 170,
+        z = 70, cornerRadius = 8
+    },
+    font = "/font/pixel3",
+    list = {
+        itemHeight = 36,
+        yOffset = 20,
+        xPadding = 10
+    }
+}
+
+local FILTERS = {"All", "Pending", "Active", "Create Game", "Refresh"}
+
+function VersusGameList:new(parentScene)
+    local self = setmetatable({}, VersusGameList)
+    self.parent = parentScene
+    self.font = gfx.font.new(CONFIG.font) or gfx.font
+    self.isActive = false
+    self.isLoading = false
+    self.mode = "current" -- "current" or "inprogress"
+    self.filterIndex = 1
+    self.battleIndex = 1
+    self.activePanel = "filter"
+    self.scrollOffset = 0
+    return self
+end
+
+function VersusGameList:enter(mode)
+    -- 1. Reset View State if switching modes
+    if mode then
+        self.mode = mode
+        self.filterIndex = 1
+        self.battleIndex = 1
+        self.activePanel = "filter"
+    end
+    
+    -- 2. FORCE REFRESH: Always set loading to true
+    self.isLoading = true
+    self.isActive = true
+    self:redraw() -- Shows "Loading..." immediately
+    
+    -- 3. Execute Fetch
+    print("VersusGameList: Force refreshing data for mode: " .. tostring(self.mode))
+    
+    if self.mode == "inprogress" then
+        if self.parent.api then self.parent.api:loadInProgressGames() end
+    else
+        if self.parent.api then self.parent.api:loadCurrentGames("all") end
+    end
+
+    -- Calculate initial scrollOffset
+    self.scrollOffset = 0
+    self:_updateScrollOffset()
+end
+
+function VersusGameList:exit()
+    self.isActive = false
+end
+
+function VersusGameList:redraw()
+    self:_redrawFilterPanel()
+    self:_redrawBattleListPanel()
+end
+
+function VersusGameList:_updateScrollOffset()
+    local p = CONFIG.rightPanel
+    local l = CONFIG.list
+    local itemHeight = l.itemHeight + 4
+    local clipPadding = l.xPadding
+    local contentHeight = p.height - clipPadding - 4
+    
+    -- How many items fully fit in view
+    local visibleItems = 4
+    
+    -- First visible item index (1-based)
+    local firstVisible = math.floor(self.scrollOffset / itemHeight) + 1
+    local lastVisible = firstVisible + visibleItems - 1
+    
+    -- Scroll down if selection is past last visible
+    if self.battleIndex > lastVisible then
+        self.scrollOffset = (self.battleIndex - visibleItems) * itemHeight
+    end
+    -- Scroll up if selection is before first visible
+    if self.battleIndex < firstVisible then
+        self.scrollOffset = (self.battleIndex - 1) * itemHeight
+    end
+    -- Clamp to zero minimum
+    if self.scrollOffset < 0 then
+        self.scrollOffset = 0
+    end
+end
+
+function VersusGameList:_redrawFilterPanel()
+    if not self.parent.leftPanelSprite then return end
+    
+    local p = CONFIG.leftPanel
+    local l = CONFIG.list
+    local panelImage = gfx.image.new(p.width, p.height)
+    
+    gfx.pushContext(panelImage)
+    gfx.setColor(gfx.kColorWhite)
+    gfx.fillRoundRect(0, 0, p.width, p.height, p.cornerRadius)
+    gfx.setColor(gfx.kColorBlack)
+    gfx.drawRoundRect(1, 1, p.width - 2, p.height - 2, p.cornerRadius)
+    
+    gfx.setFont(self.font)
+    for i, filter in ipairs(FILTERS) do
+        local itemY = l.yOffset + (i - 1) * 20
+        if i == self.filterIndex and self.activePanel == "filter" then
+            gfx.setColor(gfx.kColorBlack)
+            gfx.fillRect(1, itemY - 2, p.width - 2, 16)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        else
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
+        gfx.drawText(filter, l.xPadding, itemY)
+    end
+    gfx.popContext()
+    self.parent.leftPanelSprite:setImage(panelImage)
+end
+
+function VersusGameList:_redrawBattleListPanel()
+    if not self.parent.rightPanelSprite then return end
+
+    local p = CONFIG.rightPanel
+    local l = CONFIG.list
+    local panelImage = gfx.image.new(p.width, p.height)
+    local itemHeight = l.itemHeight + 4
+
+    gfx.pushContext(panelImage)
+    gfx.setColor(gfx.kColorWhite)
+    gfx.fillRoundRect(0, 0, p.width, p.height, p.cornerRadius)
+    gfx.setColor(gfx.kColorBlack)
+    gfx.drawRoundRect(1, 1, p.width - 2, p.height - 2, p.cornerRadius)
+
+    gfx.setFont(self.font)
+
+    if self.isLoading then
+        local loadingText = "Loading..."
+        local textWidth = self.font:getTextWidth(loadingText)
+        gfx.drawText(loadingText, (p.width - textWidth) / 2, (p.height / 2) - 10)
+    else
+        local currentFilter = FILTERS[self.filterIndex]
+        local battles = self:_getFilteredBattles()
+        local numBattles = #battles
+
+        if numBattles == 0 then
+            if currentFilter == "Create Game" then
+                gfx.drawTextInRect("Create your own battle and wait for an opponent to join.", l.xPadding, l.xPadding, p.width - 20, p.height - 20)
+            else
+                gfx.drawTextInRect("No battles found.", l.xPadding, l.xPadding, p.width - 20, p.height - 20)
+            end
+        else
+            local visibleItems = math.floor(p.height / itemHeight)
+            local scrollOffset = self.scrollOffset
+            scrollOffset = math.min(scrollOffset, math.max(0, (numBattles - visibleItems) * itemHeight))
+
+            local clipPadding = l.xPadding
+            gfx.setClipRect(1, clipPadding, p.width - 2, p.height - clipPadding - 4)
+
+            for i = 1, numBattles do
+                local battle = battles[i]
+                local itemY = clipPadding + (i - 1) * itemHeight - scrollOffset
+                local textY = itemY + 4
+
+                -- Separator line before each entry (except first) - inset horizontally
+                if i > 1 then
+                    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+                    gfx.setColor(gfx.kColorBlack)
+                    gfx.drawLine(l.xPadding, itemY, p.width - l.xPadding, itemY)
+                end
+
+                if i == self.battleIndex and self.activePanel == "list" then
+                    gfx.setColor(gfx.kColorBlack)
+                    gfx.fillRect(1, itemY + 1, p.width - 2, itemHeight - 2)
+                    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+                else
+                    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+                end
+
+                -- Line 1: Players + status
+                local p1 = battle.player1DisplayName or "???"
+                local p2 = battle.player2DisplayName or "Waiting..."
+                local status = battle.status or "pending"
+                local statusText = status:upper()
+                if status == "active" then
+                    statusText = "Turn " .. ((battle.currentTurn or 0) + 1)
+                end
+                local line1 = p1 .. " vs " .. p2
+                local statusWidth = self.font:getTextWidth(statusText)
+                gfx.drawText(line1, l.xPadding, textY)
+                gfx.drawText(statusText, p.width - statusWidth - l.xPadding, textY)
+
+                -- Line 2: Map name
+                local mapName = (battle.mapData and (battle.mapData.selection or battle.mapData.type)) or "Unknown"
+                local line2 = "on " .. mapName
+                gfx.drawText(line2, l.xPadding, textY + 14)
+            end
+
+            gfx.clearClipRect()
+        end
+    end
+    gfx.popContext()
+    self.parent.rightPanelSprite:setImage(panelImage)
+end
+
+function VersusGameList:_getFilteredBattles()
+    local battles = self.parent.cachedBattles or {}
+    local filterName = FILTERS[self.filterIndex]:lower()
+    
+    if filterName == "create game" or filterName == "refresh" then return {} end
+    if filterName == "all" then return battles end
+    
+    local filtered = {}
+    for _, battle in ipairs(battles) do
+        local status = battle.status and battle.status:lower() or ""
+        if status == filterName then table.insert(filtered, battle) end
+    end
+    return filtered
+end
+
+function VersusGameList:handleInput()
+    if self.isLoading then return false end
+    local selectionChanged = false
+    
+    if self.activePanel == "filter" then
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            self.filterIndex = (self.filterIndex - 2 + #FILTERS) % #FILTERS + 1
+            self.battleIndex = 1
+            self.scrollOffset = 0
+            selectionChanged = true
+        elseif pd.buttonJustPressed(pd.kButtonDown) then
+            self.filterIndex = (self.filterIndex % #FILTERS) + 1
+            self.battleIndex = 1
+            self.scrollOffset = 0
+            selectionChanged = true
+        elseif pd.buttonJustPressed(pd.kButtonRight) then
+            local battles = self:_getFilteredBattles()
+            if #battles > 0 then
+                self.activePanel = "list"
+                selectionChanged = true
+            end
+        elseif pd.buttonJustPressed(pd.kButtonB) then
+            self.parent:returnFromSubscreen()
+            return true
+        end
+    elseif self.activePanel == "list" then
+        local battles = self:_getFilteredBattles()
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            self.battleIndex = (self.battleIndex - 2 + #battles) % #battles + 1
+            self:_updateScrollOffset()
+            selectionChanged = true
+        elseif pd.buttonJustPressed(pd.kButtonDown) then
+            self.battleIndex = (self.battleIndex % #battles) + 1
+            self:_updateScrollOffset()
+            selectionChanged = true
+        elseif pd.buttonJustPressed(pd.kButtonLeft) then
+            self.activePanel = "filter"
+            selectionChanged = true
+        elseif pd.buttonJustPressed(pd.kButtonA) then
+            local selectedBattle = battles[self.battleIndex]
+            if selectedBattle then
+                if self.parent.gameDetails then
+                    self.parent.gameDetails:setBattle(selectedBattle)
+                    self.parent.gameDetails:setBackTarget(self)
+                    self.parent:transitionToSubscreen(self.parent.gameDetails)
+                end
+            end
+        elseif pd.buttonJustPressed(pd.kButtonB) then
+            self.parent:returnFromSubscreen()
+            return true
+        end
+    end
+    
+    -- Fix for the crash: using the top-level import
+    if FILTERS[self.filterIndex] == "Create Game" and pd.buttonJustPressed(pd.kButtonA) then
+        local versusCreateGameScene = VersusCreateGameScene:new(self.parent)
+        versusCreateGameScene:setBackTarget(self)
+        self.parent:transitionToSubscreen(versusCreateGameScene)
+		return false
+    end
+    
+    if selectionChanged then self:redraw() end
+    return false
+end
+
+function VersusGameList:getTitle()
+    if self.mode == "inprogress" then return "My Games" else return "All Games" end
+end
+
+function VersusGameList:getLeftPanelConfig() return CONFIG.leftPanel end
+function VersusGameList:getRightPanelConfig() return CONFIG.rightPanel end
+
+function VersusGameList:populateData(battles)
+    print("VersusGameList: Populating data (" .. (battles and #battles or 0) .. " items)")
+    self.isLoading = false
+    self.battleIndex = 1
+    self.scrollOffset = 0
+    if battles then self.parent.cachedBattles = battles end
+    self:redraw()
+end
+
+return VersusGameList

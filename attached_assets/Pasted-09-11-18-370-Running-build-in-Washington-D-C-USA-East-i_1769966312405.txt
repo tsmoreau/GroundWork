@@ -1,0 +1,40 @@
+09:11:18.370 Running build in Washington, D.C., USA (East) – iad1
+09:11:18.372 Build machine configuration: 2 cores, 8 GB
+09:11:18.747 Cloning github.com/tsmoreau/birdwarsRoost (Branch: main, Commit: 2266e33)
+09:11:29.034 Cloning completed: 10.286s
+09:11:29.469 Restored build cache from previous deployment (228rxEVKU5SwREXVCmCXErTW4RgL)
+09:11:29.804 Running "vercel build"
+09:11:30.894 Vercel CLI 50.9.6
+09:11:31.171 WARNING: You should not upload the `.next` directory.
+09:11:31.178 Installing dependencies...
+09:11:33.001 npm error code ERESOLVE
+09:11:33.002 npm error ERESOLVE could not resolve
+09:11:33.002 npm error
+09:11:33.003 npm error While resolving: @auth/mongodb-adapter@3.11.1
+09:11:33.003 npm error Found: mongodb@7.0.0
+09:11:33.004 npm error node_modules/mongodb
+09:11:33.004 npm error   mongodb@"^7.0.0" from the root project
+09:11:33.004 npm error   mongodb@"~7.0" from mongoose@9.1.5
+09:11:33.005 npm error   node_modules/mongoose
+09:11:33.005 npm error     mongoose@"^9.1.5" from the root project
+09:11:33.005 npm error
+09:11:33.005 npm error Could not resolve dependency:
+09:11:33.006 npm error peer mongodb@"^6" from @auth/mongodb-adapter@3.11.1
+09:11:33.006 npm error node_modules/@auth/mongodb-adapter
+09:11:33.006 npm error   @auth/mongodb-adapter@"^3.11.1" from the root project
+09:11:33.006 npm error
+09:11:33.007 npm error Conflicting peer dependency: mongodb@6.21.0
+09:11:33.007 npm error node_modules/mongodb
+09:11:33.007 npm error   peer mongodb@"^6" from @auth/mongodb-adapter@3.11.1
+09:11:33.007 npm error   node_modules/@auth/mongodb-adapter
+09:11:33.007 npm error     @auth/mongodb-adapter@"^3.11.1" from the root project
+09:11:33.008 npm error
+09:11:33.008 npm error Fix the upstream dependency conflict, or retry
+09:11:33.008 npm error this command with --force or --legacy-peer-deps
+09:11:33.008 npm error to accept an incorrect (and potentially broken) dependency resolution.
+09:11:33.008 npm error
+09:11:33.009 npm error
+09:11:33.009 npm error For a full report see:
+09:11:33.009 npm error /vercel/.npm/_logs/2026-02-01T17_11_31_659Z-eresolve-report.txt
+09:11:33.009 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-02-01T17_11_31_659Z-debug-0.log
+09:11:33.041 Error: Command "npm install" exited with 1

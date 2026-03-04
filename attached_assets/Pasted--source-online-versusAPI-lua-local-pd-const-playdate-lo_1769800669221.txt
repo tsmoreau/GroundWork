@@ -1,0 +1,605 @@
+-- source/online/versusAPI.lua
+local pd <const> = playdate
+local json <const> = json
+import "saveSystem"
+local NetworkManager = import("online/networkManager")
+
+local VersusAPI = {}
+VersusAPI.__index = VersusAPI
+
+-- Version comparison helper (returns true if current >= minimum)
+local function isVersionCompatible(current, minimum)
+    if not minimum then return true end
+    
+    local function parseVersion(v)
+        local major, minor, patch = v:match("(%d+)%.(%d+)%.(%d+)")
+        return tonumber(major) or 0, tonumber(minor) or 0, tonumber(patch) or 0
+    end
+    
+    local curMaj, curMin, curPatch = parseVersion(current)
+    local minMaj, minMin, minPatch = parseVersion(minimum)
+    
+    if curMaj ~= minMaj then return curMaj > minMaj end
+    if curMin ~= minMin then return curMin > minMin end
+    return curPatch >= minPatch
+end
+
+-- Singleton instance storage
+local _instance = nil
+
+function VersusAPI:new(parentScene, networkManager)
+    -- SINGLETON FIX: If an instance already exists, return it instead of creating a ghost
+    if _instance then
+        _instance.parent = parentScene -- Update parent to current scene
+        -- Update networkManager reference if provided
+        if networkManager then
+            _instance.networkManager = networkManager
+        end
+        return _instance
+    end
+
+    local self = setmetatable({}, VersusAPI)
+    self.parent = parentScene
+    self.networkManager = networkManager
+    
+    if not self.networkManager then
+        print("WARNING: VersusAPI created without NetworkManager - network calls will fail")
+    end
+    
+    _instance = self -- Store instance
+    return self
+end
+
+function VersusAPI:cleanup()
+    -- NetworkManager handles connection cleanup globally
+    print("VersusAPI: cleanup called")
+end
+
+function VersusAPI:_getSecretToken()
+    local tokenData = pd.datastore.read("birdwars_secretToken")
+    return tokenData and tokenData.token
+end
+
+function VersusAPI:registerDevice(retryCount)
+    if not self.networkManager then
+        self:_handleRegistrationFailure("No network")
+        return
+    end
+    
+    local currentRetry = retryCount or 0
+    local maxRetries = 3
+    
+    local secretToken = self:_getSecretToken()
+    local currentData = SaveSystem.loadCurrent()
+    local displayName = currentData.assignedName or "BIRDWARS_PLAYER"
+    
+    local headers = { ["Content-Type"] = "application/json" }
+    if secretToken then headers["Authorization"] = "Bearer " .. secretToken end
+
+    local jsonBody = json.encode({
+        displayName = displayName,
+        avatar = "BIRD1"
+    })
+    
+    -- Track if callback has fired
+    local callbackFired = false
+    
+    -- Timeout timer - if no response in 10 seconds, retry or fail
+    local timeoutTimer = pd.timer.new(10000, function()
+        if callbackFired then return end
+        callbackFired = true
+        
+        if currentRetry < maxRetries then
+            print("VersusAPI: Registration timeout, retrying... (" .. (currentRetry + 1) .. "/" .. maxRetries .. ")")
+            self:_showRetryMessage(currentRetry + 1, maxRetries, function()
+                self:registerDevice(currentRetry + 1)
+            end)
+        else
+            print("VersusAPI: Registration failed after " .. maxRetries .. " retries")
+            self:_handleRegistrationFailure("Connection timeout")
+        end
+    end)
+    
+    local success = self.networkManager.post("VersusAPI.registerDevice", "/api/register", headers, jsonBody, function(status, responseBuffer)
+        if callbackFired then return end
+        callbackFired = true
+        timeoutTimer:remove()
+        
+        -- Handle SSL/NTP errors (status 0 or nil)
+        if status == 0 or status == nil then
+            if currentRetry < maxRetries then
+                print("VersusAPI: Registration SSL/NTP error, retrying... (" .. (currentRetry + 1) .. "/" .. maxRetries .. ")")
+                self:_showRetryMessage(currentRetry + 1, maxRetries, function()
+                    self:registerDevice(currentRetry + 1)
+                end)
+            else
+                self:_handleRegistrationFailure("Network error")
+            end
+            return
+        end
+        
+        self:_handleRegistrationResponse(status, responseBuffer)
+    end)
+    
+    if not success then
+        callbackFired = true
+        timeoutTimer:remove()
+        
+        if currentRetry < maxRetries then
+            print("VersusAPI: Network call failed, retrying... (" .. (currentRetry + 1) .. "/" .. maxRetries .. ")")
+            self:_showRetryMessage(currentRetry + 1, maxRetries, function()
+                self:registerDevice(currentRetry + 1)
+            end)
+        else
+            self:_handleRegistrationFailure("WiFi not ready")
+        end
+    end
+end
+
+function VersusAPI:_showRetryMessage(attempt, maxAttempts, onContinue)
+    if self.parent and self.parent.showRegisterRetry then
+        self.parent:showRegisterRetry(attempt, maxAttempts, onContinue)
+    else
+        -- Fallback if parent doesn't have the method - just retry after delay
+        pd.timer.new(2000, onContinue)
+    end
+end
+
+function VersusAPI:_handleRegistrationFailure(reason)
+    print("VersusAPI: Registration failed - " .. tostring(reason))
+    if self.parent and self.parent.failRegistering then
+        self.parent:failRegistering(reason)
+    end
+end
+
+function VersusAPI:_handleRegistrationResponse(statusCode, responseBody)
+    if statusCode ~= 200 and statusCode ~= 201 then
+        print("Server Error: " .. tostring(statusCode))
+        self:_handleRegistrationFailure("Server error " .. tostring(statusCode))
+        return
+    end
+
+    local success, data = pcall(function() return json.decode(responseBody) end)
+    if not success or not data then
+        self:_handleRegistrationFailure("Invalid response")
+        return
+    end
+
+    -- VERSION CHECK: Compare client version against server's minimum
+    if data.minClientVersion then
+        local clientVersion = NetworkManager.getClientVersion()
+        if not isVersionCompatible(clientVersion, data.minClientVersion) then
+            print("VersusAPI: Client version " .. clientVersion .. " < required " .. data.minClientVersion)
+            self:_handleRegistrationFailure("Update required (v" .. data.minClientVersion .. "+)")
+            return
+        end
+        print("✓ Version check passed: " .. clientVersion .. " >= " .. data.minClientVersion)
+    end
+
+    if data.success then
+        if data.deviceId then
+            pd.datastore.write({id = data.deviceId}, "birdwars_deviceId")
+        end
+        if data.secretToken then
+            pd.datastore.write({token = data.secretToken}, "birdwars_secretToken")
+            print("✓ Registered & Saved Token")
+        end
+        -- Save avatar to current.json
+        local currentData = SaveSystem.loadCurrent()
+        currentData.avatar = "BIRD1"
+        SaveSystem.saveCurrent(currentData)
+        print("✓ Avatar synced: BIRD1")
+        
+        -- Notify parent of completion
+        if self.parent and self.parent.completeRegistering then
+            self.parent:completeRegistering()
+        end
+    else
+        print("API Failed: " .. tostring(data.error))
+        self:_handleRegistrationFailure(data.error or "Registration rejected")
+    end
+end
+
+function VersusAPI:createBattle(settings, callback)
+    if not self.networkManager then
+        if callback then callback(false, nil) end
+        return
+    end
+    
+    local secretToken = self:_getSecretToken()
+    if not secretToken then
+        if callback then callback(false, nil) end
+        return
+    end
+    
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. secretToken
+    }
+    
+    local payload = {
+        mapId = settings.mapId,
+        mapData = settings.mapData, 
+        config = {
+            turnLimit = settings.turnLimit,
+            fogOfWar = true,
+            startingFood = settings.startingFood
+        }
+    }
+    
+    -- FIX: Check if network call succeeded
+    local success = self.networkManager.post("VersusAPI.createBattle", "/api/battles", headers, json.encode(payload), function(status, responseBuffer)
+        if status == 200 or status == 201 then
+            local success, data = pcall(function() return json.decode(responseBuffer) end)
+            if success and data and data.success then
+                if callback then callback(true, data.battle) end
+            else
+                if callback then callback(false, nil) end
+            end
+        elseif status == 403 then
+            -- Check for limit_reached error
+            local success, data = pcall(function() return json.decode(responseBuffer) end)
+            if success and data and data.error == "limit_reached" then
+                print("VersusAPI: Game limit reached")
+                if self.parent.showErrorModal then
+                    self.parent:showErrorModal("Max 9 games allowed")
+                end
+            end
+            if callback then callback(false, nil) end
+        else
+            if callback then callback(false, nil) end
+        end
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+        if callback then callback(false, nil) end
+    end
+end
+
+function VersusAPI:loadProfile()
+    if not self.networkManager then return end
+    
+    local secretToken = self:_getSecretToken()
+    if not secretToken then return end
+    
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. secretToken
+    }
+    
+    -- FIX: Check if network call succeeded
+    local success = self.networkManager.get("VersusAPI.loadProfile", "/api/stats", headers, function(status, responseBuffer)
+        self:_handleProfileResponse(status, responseBuffer)
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+    end
+end
+
+function VersusAPI:_handleProfileResponse(statusCode, responseBody)
+    if statusCode ~= 200 then return end
+    
+    local success, data = pcall(function() return json.decode(responseBody) end)
+    if success and data and data.success then
+        self.parent.profileData = data.stats
+        
+        -- Sync avatar from server to current.json
+        if data.stats.avatar then
+            local currentData = SaveSystem.loadCurrent()
+            currentData.avatar = data.stats.avatar
+            SaveSystem.saveCurrent(currentData)
+        end
+        
+        -- Notify parent of completion
+        if self.parent and self.parent.completeLoadingProfile then
+            self.parent:completeLoadingProfile()
+        end
+    end
+end
+
+function VersusAPI:loadCurrentGames(filter, cursor, callback)
+    if not self.networkManager then
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+        return
+    end
+    
+    -- Build URL with pagination params
+    local url = "/api/battles?limit=9"
+    if cursor then
+        url = url .. "&cursor=" .. cursor
+    end
+    
+    local success = self.networkManager.get("VersusAPI.loadCurrentGames", url, {}, function(status, responseBuffer)
+        self:_handleCurrentGamesResponse(status, responseBuffer, filter, callback)
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+    end
+end
+
+function VersusAPI:_handleCurrentGamesResponse(statusCode, responseBody, filter, callback)
+    local function fail()
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+    end
+    
+    if statusCode ~= 200 then
+        fail()
+        return
+    end
+    
+    -- Validate responseBody
+    if not responseBody or type(responseBody) ~= "string" or #responseBody == 0 then
+        print("VersusAPI: Empty or invalid response body")
+        fail()
+        return
+    end
+    
+    -- Check for HTML response
+    if string.sub(responseBody, 1, 1) == "<" then
+        print("VersusAPI: Received HTML instead of JSON")
+        fail()
+        return
+    end
+    
+    local success, data = pcall(function() return json.decode(responseBody) end)
+    
+    if not success then
+        print("VersusAPI: JSON Decode Failed - " .. tostring(data))
+        fail()
+        return
+    end
+    
+    if not data then
+        print("VersusAPI: JSON decode returned nil - malformed JSON")
+        fail()
+        return
+    end
+
+    if data.success then
+        local battles = data.battles or {}
+        local pagination = data.pagination  -- { hasMore, nextCursor, total }
+        
+        -- Client-side filtering (will be deprecated once server supports filter param)
+        if filter and filter ~= "all" then
+            local filtered = {}
+            for _, battle in ipairs(battles) do
+                if battle.status == filter then table.insert(filtered, battle) end
+            end
+            battles = filtered
+        end
+        
+        if callback then
+            callback(battles, pagination)
+        else
+            -- Legacy path
+            self.parent.cachedBattles = battles
+            if self.parent.activeSubscreen == self.parent.gameList then
+                self.parent.gameList:populateData(battles)
+            end
+        end
+    else
+        print("VersusAPI: API returned success=false - " .. tostring(data.error))
+        fail()
+    end
+end
+
+function VersusAPI:loadInProgressGames(cursor, callback)
+    if not self.networkManager then
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+        return
+    end
+    
+    local secretToken = self:_getSecretToken()
+    if not secretToken then
+        if callback then callback({}, nil) end
+        return
+    end
+    
+    local headers = { ["Authorization"] = "Bearer " .. secretToken }
+    
+    -- Build URL with pagination params
+    local url = "/api/mybattles?limit=9"
+    if cursor then
+        url = url .. "&cursor=" .. cursor
+    end
+    
+    local success = self.networkManager.get("VersusAPI.loadInProgressGames", url, headers, function(status, responseBuffer)
+        self:_handleInProgressResponse(status, responseBuffer, callback)
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+    end
+end
+
+function VersusAPI:_handleInProgressResponse(statusCode, responseBody, callback)
+    local function fail()
+        if callback then
+            callback({}, nil)
+        elseif self.parent.activeSubscreen == self.parent.gameList then
+            self.parent.gameList:populateData({})
+        end
+    end
+    
+    if statusCode ~= 200 then
+        fail()
+        return
+    end
+    
+    -- Validate responseBody
+    if not responseBody or type(responseBody) ~= "string" or #responseBody == 0 then
+        print("VersusAPI: Empty or invalid response body")
+        fail()
+        return
+    end
+    
+    local success, data = pcall(function() return json.decode(responseBody) end)
+    
+    if not success then
+        print("VersusAPI: JSON Decode Failed - " .. tostring(data))
+        fail()
+        return
+    end
+    
+    if not data then
+        print("VersusAPI: JSON decode returned nil - malformed JSON")
+        fail()
+        return
+    end
+
+    if data.success then
+        local battles = data.battles or {}
+        local pagination = data.pagination  -- { hasMore, nextCursor, total }
+        
+        if callback then
+            callback(battles, pagination)
+        else
+            -- Legacy path
+            self.parent.cachedBattles = battles
+            if self.parent.activeSubscreen == self.parent.gameList then
+                self.parent.gameList:populateData(battles)
+            end
+        end
+    else
+        print("VersusAPI: API returned success=false - " .. tostring(data.error))
+        fail()
+    end
+end
+
+function VersusAPI:loadBattleDetail(battleId)
+    if not self.networkManager then return end
+    
+    -- FIX: Check if network call succeeded
+    local success = self.networkManager.get("VersusAPI.loadBattleDetail", "/api/battles/" .. battleId, {}, function(status, responseBuffer)
+        self:_handleBattleDetailResponse(status, responseBuffer)
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+    end
+end
+
+function VersusAPI:_handleBattleDetailResponse(statusCode, responseBody)
+    if statusCode ~= 200 then return end
+    
+    local success, data = pcall(function() return json.decode(responseBody) end)
+    if success and data and data.success then
+        if self.parent.gameDetails then
+            self.parent.gameDetails:setBattle(data.battle)
+        end
+    end
+end
+
+function VersusAPI:joinBattle(battleId)
+    if not self.networkManager then return end
+    
+    local secretToken = self:_getSecretToken()
+    if not secretToken then return end
+    
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. secretToken
+    }
+    
+    -- FIX: Check if network call succeeded
+    local success = self.networkManager.post("VersusAPI.joinBattle", "/api/battles/" .. battleId .. "/join", headers, json.encode({}), function(status, responseBuffer)
+        self:_handleJoinBattleResponse(status, responseBuffer)
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+    end
+end
+
+function VersusAPI:_handleJoinBattleResponse(statusCode, responseBody)
+    if statusCode == 200 then
+        local success, data = pcall(function() return json.decode(responseBody) end)
+        if success and data and data.success then
+            if self.parent.gameDetails then
+                self.parent.gameDetails:completeJoining()
+            end
+        end
+    elseif statusCode == 403 then
+        -- Check for limit_reached error
+        local success, data = pcall(function() return json.decode(responseBody) end)
+        if success and data and data.error == "limit_reached" then
+            print("VersusAPI: Game limit reached")
+            if self.parent.showErrorModal then
+                self.parent:showErrorModal("Max 9 games allowed")
+            end
+        end
+        -- Reset joining state on failure
+        if self.parent.gameDetails then
+            self.parent.gameDetails.isJoining = false
+            self.parent.gameDetails.joinComplete = false
+            if self.parent.gameDetails.isActive then
+                self.parent.gameDetails:redraw()
+            end
+        end
+    end
+end
+
+function VersusAPI:cancelBattle(battleId, callback)
+    if not self.networkManager then
+        if callback then callback(false) end
+        return
+    end
+    
+    local secretToken = self:_getSecretToken()
+    if not secretToken then
+        if callback then callback(false) end
+        return
+    end
+    
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. secretToken
+    }
+    
+    local success = self.networkManager.post("VersusAPI.cancelBattle", "/api/battles/" .. battleId .. "/cancel", headers, json.encode({}), function(status, responseBuffer)
+        if status == 200 then
+            local success, data = pcall(function() return json.decode(responseBuffer) end)
+            if success and data and data.success then
+                print("VersusAPI: Battle cancelled")
+                if callback then callback(true) end
+            else
+                if callback then callback(false) end
+            end
+        else
+            print("VersusAPI: Cancel failed with status " .. tostring(status))
+            if callback then callback(false) end
+        end
+    end)
+    
+    if not success then
+        print("VersusAPI: Network call failed (WiFi not confirmed?)")
+        if callback then callback(false) end
+    end
+end
+
+return VersusAPI

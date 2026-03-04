@@ -1,0 +1,45 @@
+According to the schema, the server only validates a specific whitelist of action types: move, attack, build, capture, wait, and end_turn. Because your engine is now sending take_off, land, and supply, the server is likely returning a 400 Bad Request error because the payload fails schema validation.
+
+To fix this, the server-side code (likely in your Replit deployment) needs to update its Action data model and validation logic.
+
+Required Server-Side Schema Updates
+1. Update the Action Type Enum
+The server's action type validation must be expanded to include:
+
+take_off: Transition a unit from ground to air.
+
+land: Transition a unit from air to ground.
+
+supply: Replenish food for adjacent units.
+
+2. Synchronize the Action Data Model
+The documentation for the Action model in API_SCHEMA (3).md should be updated to reflect these changes:
+
+TypeScript
+
+// Updated Server-Side Action Model
+{
+  type: 'move' | 'attack' | 'build' | 'capture' | 'wait' | 'end_turn' | 'take_off' | 'land' | 'supply';
+  unitId?: string;          
+  from?: { x: number, y: number };  
+  to?: { x: number, y: number };    
+  targetId?: string;        
+  data?: object;            
+}
+Why this breaks the Playdate client
+In your current onlineBattleController.lua, the _handleSubmitResponse function only prints a success message and updates the game state if it receives a 200 or 201 status code.
+
+When you perform a TAKE_OFF action:
+
+The recorder successfully buffers the action.
+
+The serializer converts TAKE_OFF to "take_off".
+
+The client sends the payload to /api/turns.
+
+The server rejects it with a 400 error because "take_off" is not in its allowed list.
+
+The client receives the 400, resets the isSubmitting flag, but prints nothing, leaving you in a state where the turn appears to have vanished.
+
+Note on Unit Data
+The unit data model in the schema already includes isFlying, so the server is already prepared to store the result of the flight state, but it is not currently prepared to record the action that caused it.
