@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Loader } from "@googlemaps/js-api-loader";
 import type { IFeature, ILayer } from "@/types/groundwork";
 
 type DrawingMode = "select" | "polygon" | "rectangle" | "circle" | "polyline" | "line" | "text";
@@ -70,7 +71,7 @@ export default function MapView({
 
   useEffect(() => {
     if (!mapRef.current) return;
-    if (mapInstance.current) return; // already initialized — guard against StrictMode double-invoke
+    if (mapInstance.current) return;
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
     if (!apiKey) {
@@ -78,12 +79,18 @@ export default function MapView({
       return;
     }
 
-    const loadMap = () => {
-      if (!mapRef.current || mapInstance.current) return; // guard inside callback too
+    let cancelled = false;
+
+    (async () => {
+      const loader = new Loader({ apiKey, version: "weekly" });
+      const { Map } = await loader.importLibrary("maps");
+
+      if (cancelled || !mapRef.current || mapInstance.current) return;
+
       const center = snapshot?.center || DEFAULT_CENTER;
       const zoom = snapshot?.zoom || DEFAULT_ZOOM;
 
-      const map = new google.maps.Map(mapRef.current, {
+      const map = new Map(mapRef.current, {
         center,
         zoom,
         heading: snapshot?.heading || 0,
@@ -111,37 +118,10 @@ export default function MapView({
           };
         });
       }
-    };
-
-    if (typeof google !== "undefined" && google.maps) {
-      loadMap();
-      return;
-    }
-
-    const callbackName = "__groundwork_gmaps_cb";
-    (window as any)[callbackName] = () => {
-      loadMap();
-      delete (window as any)[callbackName];
-    };
-
-    const existingScript = document.getElementById("gmaps-script");
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.id = "gmaps-script";
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&callback=${callbackName}`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    } else if (typeof google !== "undefined" && google.maps) {
-      loadMap();
-      delete (window as any)[callbackName];
-    }
-    // else: script tag exists but hasn't loaded yet — the callback will fire when it does
+    })();
 
     return () => {
-      // intentionally not nulling mapInstance.current here — the guard above
-      // prevents a second initialization; nulling it would let StrictMode's
-      // second mount create a new map, breaking all event listeners on the first.
+      cancelled = true;
     };
   }, []);
 
