@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import type { IFeature, ILayer } from "@/types/groundwork";
 
 type DrawingMode = "select" | "polygon" | "rectangle" | "circle" | "polyline" | "line" | "text";
@@ -82,8 +82,8 @@ export default function MapView({
     let cancelled = false;
 
     (async () => {
-      const loader = new Loader({ apiKey, version: "weekly" });
-      const { Map } = await loader.importLibrary("maps");
+      setOptions({ key: apiKey, v: "weekly" });
+      const { Map } = await importLibrary("maps") as google.maps.MapsLibrary;
 
       if (cancelled || !mapRef.current || mapInstance.current) return;
 
