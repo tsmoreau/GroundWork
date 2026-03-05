@@ -15,7 +15,14 @@ import ExportMenu from "@/components/ExportMenu";
 import type { IProject, IFeature, ILayer } from "@/types/groundwork";
 import { Camera } from "lucide-react";
 
-type DrawingMode = "select" | "polygon" | "rectangle" | "circle" | "polyline" | "line" | "text";
+type DrawingMode =
+  | "select"
+  | "polygon"
+  | "rectangle"
+  | "circle"
+  | "polyline"
+  | "line"
+  | "text";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -29,12 +36,21 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string>("viewer");
   const [drawingMode, setDrawingMode] = useState<DrawingMode>("select");
-  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null);
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(
+    null,
+  );
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const snapshotCaptureRef = useRef<(() => { center: { lat: number; lng: number }; zoom: number; heading: number } | null) | null>(null);
+  const snapshotCaptureRef = useRef<
+    | (() => {
+        center: { lat: number; lng: number };
+        zoom: number;
+        heading: number;
+      } | null)
+    | null
+  >(null);
 
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
@@ -94,7 +110,11 @@ export default function ProjectPage() {
     };
   }, [fetchProject, fetchFeatures]);
 
-  const handleSetSnapshot = async (snapshot: { center: { lat: number; lng: number }; zoom: number; heading: number }) => {
+  const handleSetSnapshot = async (snapshot: {
+    center: { lat: number; lng: number };
+    zoom: number;
+    heading: number;
+  }) => {
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
@@ -102,11 +122,15 @@ export default function ProjectPage() {
         body: JSON.stringify({ snapshot }),
       });
       if (res.ok) {
-        setProject((prev) => prev ? { ...prev, snapshot } : prev);
+        setProject((prev) => (prev ? { ...prev, snapshot } : prev));
         toast({ title: "Snapshot saved" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to save snapshot", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to save snapshot",
+        variant: "destructive",
+      });
     }
   };
 
@@ -118,7 +142,7 @@ export default function ProjectPage() {
         body: JSON.stringify({ layers }),
       });
       if (res.ok) {
-        setProject((prev) => prev ? { ...prev, layers } : prev);
+        setProject((prev) => (prev ? { ...prev, layers } : prev));
       }
     } catch {}
   };
@@ -140,26 +164,35 @@ export default function ProjectPage() {
         const created = await res.json();
         setFeatures((prev) => [...prev, created]);
         pushUndo({ type: "create", feature: created });
-        setDrawingMode("select");
-        setSelectedFeatureId(created._id);
+        // Stay in current drawing mode — user switches out explicitly via
+        // Escape or clicking the select tool. No auto-reset.
         return created;
       }
     } catch {}
   };
 
-  const handleUpdateFeature = async (featureId: string, updates: Partial<IFeature>) => {
+  const handleUpdateFeature = async (
+    featureId: string,
+    updates: Partial<IFeature>,
+  ) => {
     if (!canEdit) return;
     const old = features.find((f) => f._id === featureId);
     try {
-      const res = await fetch(`/api/projects/${projectId}/features/${featureId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
+      const res = await fetch(
+        `/api/projects/${projectId}/features/${featureId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates),
+        },
+      );
       if (res.ok) {
         const updated = await res.json();
-        setFeatures((prev) => prev.map((f) => (f._id === featureId ? updated : f)));
-        if (old) pushUndo({ type: "update", featureId, before: old, after: updated });
+        setFeatures((prev) =>
+          prev.map((f) => (f._id === featureId ? updated : f)),
+        );
+        if (old)
+          pushUndo({ type: "update", featureId, before: old, after: updated });
       }
     } catch {}
   };
@@ -168,9 +201,12 @@ export default function ProjectPage() {
     if (!canEdit) return;
     const old = features.find((f) => f._id === featureId);
     try {
-      const res = await fetch(`/api/projects/${projectId}/features/${featureId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/projects/${projectId}/features/${featureId}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (res.ok) {
         setFeatures((prev) => prev.filter((f) => f._id !== featureId));
         if (old) pushUndo({ type: "delete", feature: old });
@@ -185,18 +221,28 @@ export default function ProjectPage() {
     setUndoStack((prev) => prev.slice(0, -1));
 
     if (action.type === "create") {
-      await fetch(`/api/projects/${projectId}/features/${action.feature._id}`, { method: "DELETE" });
+      await fetch(`/api/projects/${projectId}/features/${action.feature._id}`, {
+        method: "DELETE",
+      });
       setFeatures((prev) => prev.filter((f) => f._id !== action.feature._id));
       setRedoStack((prev) => [...prev, action]);
     } else if (action.type === "update") {
-      const res = await fetch(`/api/projects/${projectId}/features/${action.featureId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ geometry: action.before.geometry, properties: action.before.properties }),
-      });
+      const res = await fetch(
+        `/api/projects/${projectId}/features/${action.featureId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            geometry: action.before.geometry,
+            properties: action.before.properties,
+          }),
+        },
+      );
       if (res.ok) {
         const restored = await res.json();
-        setFeatures((prev) => prev.map((f) => (f._id === action.featureId ? restored : f)));
+        setFeatures((prev) =>
+          prev.map((f) => (f._id === action.featureId ? restored : f)),
+        );
       }
       setRedoStack((prev) => [...prev, action]);
     } else if (action.type === "delete") {
@@ -230,18 +276,28 @@ export default function ProjectPage() {
       }
       setUndoStack((prev) => [...prev, action]);
     } else if (action.type === "update") {
-      const res = await fetch(`/api/projects/${projectId}/features/${action.featureId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ geometry: action.after.geometry, properties: action.after.properties }),
-      });
+      const res = await fetch(
+        `/api/projects/${projectId}/features/${action.featureId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            geometry: action.after.geometry,
+            properties: action.after.properties,
+          }),
+        },
+      );
       if (res.ok) {
         const updated = await res.json();
-        setFeatures((prev) => prev.map((f) => (f._id === action.featureId ? updated : f)));
+        setFeatures((prev) =>
+          prev.map((f) => (f._id === action.featureId ? updated : f)),
+        );
       }
       setUndoStack((prev) => [...prev, action]);
     } else if (action.type === "delete") {
-      await fetch(`/api/projects/${projectId}/features/${action.feature._id}`, { method: "DELETE" });
+      await fetch(`/api/projects/${projectId}/features/${action.feature._id}`, {
+        method: "DELETE",
+      });
       setFeatures((prev) => prev.filter((f) => f._id !== action.feature._id));
       setUndoStack((prev) => [...prev, action]);
     }
@@ -271,7 +327,8 @@ export default function ProjectPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [selectedFeatureId, undoStack, redoStack]);
 
-  const selectedFeature = features.find((f) => f._id === selectedFeatureId) || null;
+  const selectedFeature =
+    features.find((f) => f._id === selectedFeatureId) || null;
 
   if (loading) {
     return (
@@ -299,7 +356,10 @@ export default function ProjectPage() {
         canEdit={canEdit}
         userImage={session?.user?.image}
       >
-        <ExportMenu mapContainerRef={mapContainerRef} projectName={project.name} />
+        <ExportMenu
+          mapContainerRef={mapContainerRef}
+          projectName={project.name}
+        />
       </TopBar>
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -323,7 +383,9 @@ export default function ProjectPage() {
             onCreateFeature={handleCreateFeature}
             onUpdateFeature={handleUpdateFeature}
             canEdit={canEdit}
-            onCaptureReady={(fn) => { snapshotCaptureRef.current = fn; }}
+            onCaptureReady={(fn) => {
+              snapshotCaptureRef.current = fn;
+            }}
           />
 
           {!snapshotSet && canEdit && (
@@ -332,7 +394,8 @@ export default function ProjectPage() {
                 <Camera className="w-10 h-10 mx-auto mb-3 text-primary" />
                 <h3 className="font-semibold mb-2">Set Your View</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Navigate the map to your property, then capture the view as your project home.
+                  Navigate the map to your property, then capture the view as
+                  your project home.
                 </p>
                 <Button
                   onClick={() => {
@@ -371,7 +434,9 @@ export default function ProjectPage() {
           <PropertiesPanel
             feature={selectedFeature}
             layers={project.layers}
-            onUpdate={(updates) => handleUpdateFeature(selectedFeature._id, updates)}
+            onUpdate={(updates) =>
+              handleUpdateFeature(selectedFeature._id, updates)
+            }
             onDelete={() => handleDeleteFeature(selectedFeature._id)}
             onClose={() => setSelectedFeatureId(null)}
           />

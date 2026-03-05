@@ -1,28 +1,28 @@
-import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import SessionProvider from '@/components/SessionProvider';
-import { Toaster } from '@/components/Toaster';
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import SessionProvider from "@/components/SessionProvider";
+import { Toaster } from "@/components/Toaster";
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: 'Groundwork — Property Layout Planning',
-  description: 'Draw shapes, lines, and text over satellite imagery to create collaborative property layout plans.',
-  manifest: '/manifest.json',
+  title: "Groundwork — Property Layout Planning",
+  description:
+    "Draw shapes, lines, and text over satellite imagery to create collaborative property layout plans.",
+  manifest: "/manifest.json",
   openGraph: {
-    title: 'Groundwork — Property Layout Planning',
-    description: 'Draw shapes, lines, and text over satellite imagery to create collaborative property layout plans.',
-    type: 'website',
+    title: "Groundwork — Property Layout Planning",
+    description:
+      "Draw shapes, lines, and text over satellite imagery to create collaborative property layout plans.",
+    type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
-  width: 'device-width',
+  themeColor: "#2563eb",
+  width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({

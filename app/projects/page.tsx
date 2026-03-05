@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -50,7 +49,11 @@ interface ProjectListItem {
   name: string;
   role: string;
   updatedAt: string;
-  snapshot: { center: { lat: number; lng: number }; zoom: number; heading: number } | null;
+  snapshot: {
+    center: { lat: number; lng: number };
+    zoom: number;
+    heading: number;
+  } | null;
 }
 
 export default function ProjectsPage() {
@@ -66,6 +69,17 @@ export default function ProjectsPage() {
   const [renameName, setRenameName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Guard: when a dropdown menu action fires, this prevents the card's
+  // onClick from navigating (pointerup lands on card after portal closes).
+  const menuActionRef = useRef(false);
+  const guardedNavigate = (id: string) => {
+    if (menuActionRef.current) {
+      menuActionRef.current = false;
+      return;
+    }
+    router.push(`/projects/${id}`);
+  };
+
   const fetchProjects = async () => {
     try {
       const res = await fetch("/api/projects");
@@ -74,7 +88,11 @@ export default function ProjectsPage() {
         setProjects(data);
       }
     } catch {
-      toast({ title: "Error", description: "Failed to load projects", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to load projects",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -99,10 +117,18 @@ export default function ProjectsPage() {
         setNewName("");
         router.push(`/projects/${project._id}`);
       } else {
-        toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: "Failed to create project",
+          variant: "destructive",
+        });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to create project",
+        variant: "destructive",
+      });
     } finally {
       setCreating(false);
     }
@@ -118,37 +144,56 @@ export default function ProjectsPage() {
       });
       if (res.ok) {
         setRenameId(null);
+        menuActionRef.current = false;
         fetchProjects();
         toast({ title: "Project renamed" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to rename project", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to rename project",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDuplicate = async (id: string) => {
     try {
-      const res = await fetch(`/api/projects/${id}/duplicate`, { method: "POST" });
+      const res = await fetch(`/api/projects/${id}/duplicate`, {
+        method: "POST",
+      });
       if (res.ok) {
+        menuActionRef.current = false;
         fetchProjects();
         toast({ title: "Project duplicated" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to duplicate", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to duplicate",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`/api/projects/${deleteId}`, { method: "DELETE" });
+      const res = await fetch(`/api/projects/${deleteId}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
         setDeleteId(null);
+        menuActionRef.current = false;
         fetchProjects();
         toast({ title: "Project deleted" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to delete",
+        variant: "destructive",
+      });
     }
   };
 
@@ -159,7 +204,9 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
-              <span className="text-lg font-bold tracking-tight">Groundwork</span>
+              <span className="text-lg font-bold tracking-tight">
+                Groundwork
+              </span>
             </div>
             <div className="flex items-center gap-2">
               {session?.user?.image && (
@@ -185,7 +232,9 @@ export default function ProjectsPage() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold" data-testid="text-page-title">Projects</h1>
+          <h1 className="text-2xl font-bold" data-testid="text-page-title">
+            Projects
+          </h1>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button data-testid="button-create-project">
@@ -211,7 +260,11 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreate} disabled={creating || !newName.trim()} data-testid="button-confirm-create">
+                <Button
+                  onClick={handleCreate}
+                  disabled={creating || !newName.trim()}
+                  data-testid="button-confirm-create"
+                >
                   {creating ? "Creating..." : "Create"}
                 </Button>
               </DialogFooter>
@@ -237,7 +290,10 @@ export default function ProjectsPage() {
             <CardContent>
               <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground mb-4">No projects yet</p>
-              <Button onClick={() => setCreateOpen(true)} data-testid="button-create-first">
+              <Button
+                onClick={() => setCreateOpen(true)}
+                data-testid="button-create-first"
+              >
                 <Plus className="w-4 h-4 mr-1" />
                 Create your first project
               </Button>
@@ -250,18 +306,17 @@ export default function ProjectsPage() {
                 key={project._id}
                 className="cursor-pointer hover:border-primary/30 transition-colors group"
                 data-testid={`card-project-${project._id}`}
-                onClick={() => router.push(`/projects/${project._id}`)}
+                onClick={() => guardedNavigate(project._id)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <CardTitle
-                      className="text-base cursor-pointer hover:text-primary transition-colors"
-                      onClick={() => router.push(`/projects/${project._id}`)}
+                      className="text-base hover:text-primary transition-colors"
                       data-testid={`link-project-${project._id}`}
                     >
                       {project.name}
                     </CardTitle>
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
@@ -273,9 +328,13 @@ export default function ProjectsPage() {
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <DropdownMenuItem
-                          onClick={() => {
+                          onSelect={() => {
+                            menuActionRef.current = true;
                             setRenameId(project._id);
                             setRenameName(project.name);
                           }}
@@ -285,7 +344,10 @@ export default function ProjectsPage() {
                           Rename
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDuplicate(project._id)}
+                          onSelect={() => {
+                            menuActionRef.current = true;
+                            handleDuplicate(project._id);
+                          }}
                           data-testid={`button-duplicate-${project._id}`}
                         >
                           <Copy className="w-4 h-4 mr-2" />
@@ -294,7 +356,10 @@ export default function ProjectsPage() {
                         {project.role === "owner" && (
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => setDeleteId(project._id)}
+                            onSelect={() => {
+                              menuActionRef.current = true;
+                              setDeleteId(project._id);
+                            }}
                             data-testid={`button-delete-${project._id}`}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -305,7 +370,7 @@ export default function ProjectsPage() {
                     </DropdownMenu>
                   </div>
                 </CardHeader>
-                <CardContent onClick={() => router.push(`/projects/${project._id}`)}>
+                <CardContent>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Badge variant="secondary" className="text-xs">
                       {project.role}
@@ -319,7 +384,15 @@ export default function ProjectsPage() {
         )}
       </main>
 
-      <Dialog open={!!renameId} onOpenChange={(open) => !open && setRenameId(null)}>
+      <Dialog
+        open={!!renameId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRenameId(null);
+            menuActionRef.current = false;
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Rename Project</DialogTitle>
@@ -335,26 +408,45 @@ export default function ProjectsPage() {
             />
           </div>
           <DialogFooter>
-            <Button onClick={handleRename} disabled={!renameName.trim()} data-testid="button-confirm-rename">
+            <Button
+              onClick={handleRename}
+              disabled={!renameName.trim()}
+              data-testid="button-confirm-rename"
+            >
               Rename
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteId(null);
+            menuActionRef.current = false;
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. All features, layers, and collaborator access will be permanently removed.
+              This action cannot be undone. All features, layers, and
+              collaborator access will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} data-testid="button-confirm-delete">
+            <AlertDialogCancel data-testid="button-cancel-delete">
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              data-testid="button-confirm-delete"
+            >
               Delete
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
