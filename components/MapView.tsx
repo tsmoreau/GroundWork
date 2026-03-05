@@ -22,6 +22,10 @@ interface MapViewProps {
 const DEFAULT_CENTER = { lat: 37.7749, lng: -122.4194 };
 const DEFAULT_ZOOM = 18;
 
+if (typeof window !== "undefined") {
+  setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "", v: "weekly" });
+}
+
 function hexToRGBA(hex: string, opacity: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -82,7 +86,6 @@ export default function MapView({
     let cancelled = false;
 
     (async () => {
-      setOptions({ key: apiKey, v: "weekly" });
       const { Map } = await importLibrary("maps") as google.maps.MapsLibrary;
 
       if (cancelled || !mapRef.current || mapInstance.current) return;
