@@ -58,6 +58,7 @@ export default function MapView({
   const drawingOverlay = useRef<google.maps.Polyline | google.maps.Polygon | null>(null);
   const rectStartRef = useRef<google.maps.LatLng | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [debugClicks, setDebugClicks] = useState(0);
 
   // Keep latest prop callbacks in refs so the drawing effect never needs them as deps.
   // Without this, every parent render recreates these functions → effect tears down
@@ -366,6 +367,7 @@ export default function MapView({
     map.setOptions({ draggable: false, gestureHandling: "greedy" });
 
     const clickListener = map.addListener("click", (e: google.maps.MapMouseEvent) => {
+      setDebugClicks((n) => n + 1);
       if (!e.latLng) return;
       const layers = layersRef.current;
       const layerId = layers[0]?.id || "";
@@ -482,6 +484,9 @@ export default function MapView({
           <span className="text-muted-foreground">Loading map...</span>
         </div>
       )}
+      <div className="absolute top-2 left-2 z-50 bg-black/80 text-white text-xs font-mono px-2 py-1 rounded pointer-events-none">
+        map:{mapLoaded ? "✓" : "✗"} | mode:{drawingMode} | clicks:{debugClicks}
+      </div>
     </div>
   );
 }
